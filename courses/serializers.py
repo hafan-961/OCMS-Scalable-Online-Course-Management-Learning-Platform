@@ -1,22 +1,22 @@
 from rest_framework import serializers
-from .models import Category , Course , Module , Lecture
+from .models import Category, Course, Module, Lecture
 
-class CategorySerializer(serializers.Modelserilaizer):
+class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = "__all__"
 
-class CourseSerializer(serializers.Modelserializer):
+class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = "__all__"
 
-class ModuleSerializer(serializer.Modelserializer):
+class ModuleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Module
-        fileds = "__all__"
+        fields = "__all__"
 
-class LectureSerializer(serializers.Modelserializer):
+class LectureSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lecture
         fields = "__all__"

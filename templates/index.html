@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCMS — Explore Courses</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base:#0a0b0f;--bg-card:#161820;--bg-elevated:#1c1f28;--bg-hover:#232736;
+      --accent-gold:#f5c842;--accent-gold-dim:#c9a22e;--accent-blue:#4f8ef7;
+      --accent-teal:#2dd4bf;--accent-rose:#fb7185;
+      --text-primary:#f0f0f5;--text-secondary:#8b8fa8;--text-muted:#4a4d61;
+      --border:rgba(255,255,255,0.06);
+      --radius-sm:8px;--radius-md:14px;--radius-lg:20px;
+      --font-display:'Playfair Display',serif;--font-body:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace;
+      --nav-height:68px;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:var(--font-body);background:var(--bg-base);color:var(--text-primary);min-height:100vh;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% -10%,rgba(79,142,247,.07) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 110%,rgba(245,200,66,.05) 0%,transparent 60%);pointer-events:none;z-index:0}
+
+    /* ── NAV ── */
+    .ocms-nav{position:fixed;top:0;left:0;right:0;height:var(--nav-height);background:rgba(10,11,15,.93);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 2.5rem;z-index:1000;gap:1.5rem}
+    .nav-logo{font-family:var(--font-display);font-size:1.35rem;font-weight:900;color:var(--accent-gold);text-decoration:none;letter-spacing:-.02em;display:flex;align-items:center;gap:.6rem}
+    .nav-logo-mark{width:34px;height:34px;background:var(--accent-gold);border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--bg-base);font-weight:900;font-size:.85rem}
+    .nav-links{display:flex;gap:.1rem;list-style:none;flex:1}
+    .nav-links a{color:var(--text-secondary);text-decoration:none;padding:.45rem 1rem;border-radius:6px;font-size:.875rem;font-weight:500;transition:all .18s}
+    .nav-links a:hover,.nav-links a.active{color:var(--text-primary);background:var(--bg-elevated)}
+    .nav-links a.active{color:var(--accent-gold)}
+    .nav-right{margin-left:auto;display:flex;align-items:center;gap:.75rem}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.55rem 1.25rem;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:.875rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;text-decoration:none}
+    .btn-primary{background:var(--accent-gold);color:var(--bg-base)}
+    .btn-primary:hover{background:var(--accent-gold-dim);transform:translateY(-1px);box-shadow:0 4px 20px rgba(245,200,66,.25)}
+    .btn-ghost{background:var(--bg-elevated);color:var(--text-secondary)}
+    .btn-ghost:hover{background:var(--bg-hover);color:var(--text-primary)}
+    .btn-outline{background:transparent;color:var(--text-primary);border:1px solid var(--border)}
+    .btn-outline:hover{border-color:var(--accent-gold);color:var(--accent-gold)}
+    .btn-sm{padding:.4rem .9rem;font-size:.8rem}
+    .nav-avatar{width:34px;height:34px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-teal));border-radius:50%;display:none;align-items:center;justify-content:center;font-size:.78rem;font-weight:600;color:white;cursor:pointer;text-decoration:none}
+    .nav-logout{background:transparent;border:none;color:var(--text-muted);cursor:pointer;font-family:var(--font-body);font-size:.8rem;display:none;padding:.3rem .6rem;border-radius:6px;transition:all .15s}
+    .nav-logout:hover{color:var(--accent-rose)}
+
+    /* ── HERO ── */
+    .hero{position:relative;z-index:1;padding:calc(var(--nav-height) + 5rem) 2.5rem 4rem;max-width:1280px;margin:0 auto;text-align:center}
+    .hero-eyebrow{display:inline-flex;align-items:center;gap:.5rem;background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.2);border-radius:100px;padding:.35rem 1rem;font-size:.75rem;font-weight:600;color:var(--accent-gold);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1.5rem}
+    .hero h1{font-family:var(--font-display);font-size:clamp(2.5rem,6vw,4.5rem);font-weight:900;letter-spacing:-.04em;line-height:1.05;margin-bottom:1.25rem}
+    .hero h1 em{font-style:italic;color:var(--accent-gold)}
+    .hero-sub{font-size:1.1rem;color:var(--text-secondary);max-width:540px;margin:0 auto 2.5rem;line-height:1.7}
+    .hero-btns{display:flex;gap:.75rem;justify-content:center}
+
+    /* ── FILTER BAR ── */
+    .filter-bar{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:0 2.5rem;display:flex;align-items:center;gap:1rem;margin-bottom:2.5rem;flex-wrap:wrap}
+    .search-wrap{position:relative;flex:1;min-width:200px;max-width:340px}
+    .search-icon{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none}
+    .form-control,.form-select{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);padding:.65rem 1rem;font-family:var(--font-body);font-size:.875rem;width:100%;transition:all .2s;outline:none;appearance:none;-webkit-appearance:none}
+    .search-wrap .form-control{padding-left:2.5rem}
+    .form-control:focus,.form-select:focus{border-color:rgba(245,200,66,.4);box-shadow:0 0 0 3px rgba(245,200,66,.08)}
+    .form-control::placeholder{color:var(--text-muted)}
+    .form-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238b8fa8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .9rem center;padding-right:2.5rem;cursor:pointer;width:auto;min-width:160px}
+    .form-select option{background:var(--bg-elevated)}
+    .filter-chips{display:flex;gap:.5rem;flex-wrap:wrap}
+    .chip{padding:.4rem .9rem;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--text-secondary);font-size:.8rem;font-weight:500;cursor:pointer;transition:all .15s;font-family:var(--font-body)}
+    .chip:hover,.chip.active{border-color:var(--accent-gold);color:var(--accent-gold);background:rgba(245,200,66,.08)}
+    .results-info{margin-left:auto;font-size:.8rem;color:var(--text-muted)}
+
+    /* ── COURSE GRID ── */
+    .course-grid{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:0 2.5rem 4rem;display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+    @media(max-width:1024px){.course-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:640px){.course-grid{grid-template-columns:1fr}}
+
+    /* ── COURSE CARD ── */
+    .course-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;transition:all .25s cubic-bezier(.34,1.56,.64,1);display:flex;flex-direction:column;opacity:0;animation:fadeUp .4s ease forwards}
+    .course-card:hover{border-color:rgba(255,255,255,.12);box-shadow:0 8px 40px rgba(0,0,0,.4);transform:translateY(-4px)}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    .card-thumb{height:148px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+    .thumb-1{background:linear-gradient(135deg,#1a1040 0%,#2d1b69 100%)}
+    .thumb-2{background:linear-gradient(135deg,#0f2027 0%,#2c5364 100%)}
+    .thumb-3{background:linear-gradient(135deg,#1a0a0a 0%,#3d1515 100%)}
+    .thumb-4{background:linear-gradient(135deg,#0a1a0a 0%,#153d15 100%)}
+    .thumb-5{background:linear-gradient(135deg,#1a1a0a 0%,#3d3d15 100%)}
+    .thumb-6{background:linear-gradient(135deg,#0a0a2a 0%,#15153d 100%)}
+    .thumb-icon{font-size:3rem;opacity:.7;transition:transform .3s}
+    .course-card:hover .thumb-icon{transform:scale(1.1) rotate(-3deg)}
+    .thumb-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(0,0,0,.5))}
+    .thumb-badge{position:absolute;top:.75rem;left:.75rem}
+    .badge{display:inline-flex;align-items:center;padding:.2rem .65rem;border-radius:100px;font-size:.68rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+    .badge-beginner{background:rgba(45,212,191,.15);color:#2dd4bf;border:1px solid rgba(45,212,191,.25)}
+    .badge-intermediate{background:rgba(79,142,247,.15);color:#4f8ef7;border:1px solid rgba(79,142,247,.25)}
+    .badge-advanced{background:rgba(251,113,133,.15);color:#fb7185;border:1px solid rgba(251,113,133,.25)}
+    .card-body{padding:1.25rem;flex:1;display:flex;flex-direction:column;gap:.6rem}
+    .card-category{font-size:.7rem;font-weight:600;color:var(--text-muted);letter-spacing:.08em;text-transform:uppercase}
+    .card-title{font-family:var(--font-display);font-size:1.05rem;font-weight:700;line-height:1.35;color:var(--text-primary);text-decoration:none;transition:color .15s}
+    .card-title:hover{color:var(--accent-gold)}
+    .card-desc{font-size:.8rem;color:var(--text-secondary);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;flex:1}
+    .card-footer{display:flex;align-items:center;justify-content:space-between;padding-top:.75rem;margin-top:auto;border-top:1px solid var(--border)}
+    .price-free{font-family:var(--font-mono);font-size:.85rem;font-weight:600;color:var(--accent-teal);background:rgba(45,212,191,.1);padding:.2rem .6rem;border-radius:4px}
+    .price-paid{font-family:var(--font-mono);font-size:1rem;font-weight:600;color:var(--accent-gold)}
+
+    /* ── SKELETON ── */
+    .skeleton-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden}
+    .skeleton{background:linear-gradient(90deg,var(--bg-elevated) 25%,var(--bg-hover) 50%,var(--bg-elevated) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+    /* ── PAGINATION ── */
+    .pagination-wrap{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;gap:.4rem;padding:0 2.5rem 5rem}
+    .page-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);font-size:.875rem;font-weight:500;cursor:pointer;transition:all .15s;font-family:var(--font-body)}
+    .page-btn:hover{border-color:var(--accent-gold);color:var(--accent-gold)}
+    .page-btn.active{background:var(--accent-gold);color:var(--bg-base);border-color:var(--accent-gold);font-weight:700}
+    .page-btn:disabled{opacity:.3;cursor:default;pointer-events:none}
+
+    .empty-state{grid-column:1/-1;text-align:center;padding:5rem 2rem}
+    .empty-icon{font-size:3rem;margin-bottom:1rem;opacity:.4}
+    .empty-state h3{font-family:var(--font-display);font-size:1.4rem;margin-bottom:.5rem}
+    .empty-state p{color:var(--text-secondary);font-size:.9rem}
+
+    ::-webkit-scrollbar{width:6px}
+    ::-webkit-scrollbar-track{background:var(--bg-base)}
+    ::-webkit-scrollbar-thumb{background:var(--bg-hover);border-radius:100px}
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav class="ocms-nav">
+  <a href="/" class="nav-logo">
+    <div class="nav-logo-mark">OC</div>
+    OCMS
+  </a>
+  <ul class="nav-links">
+    <li><a href="/" class="active">Explore</a></li>
+    <li><a href="/dashboard/">My Learning</a></li>
+    <li><a href="/instructor/">Teach</a></li>
+  </ul>
+  <div class="nav-right">
+    <!-- shown when logged OUT -->
+    <a href="/login/"    class="btn btn-ghost btn-sm" id="navLoginBtn">Sign In</a>
+    <a href="/login/"    class="btn btn-primary btn-sm" id="navSignupBtn">Get Started</a>
+    <!-- shown when logged IN -->
+    <a href="/dashboard/" class="nav-avatar" id="navAvatar">JD</a>
+    <button class="nav-logout" id="navLogoutBtn">Sign out</button>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-eyebrow"><span>✦</span> Curated Learning Paths</div>
+  <h1>Master New Skills,<br><em>Elevate Your Career</em></h1>
+  <p class="hero-sub">Access world-class courses taught by industry experts. Learn at your own pace, earn credentials that matter.</p>
+  <div class="hero-btns">
+    <a href="#courses" class="btn btn-primary" style="padding:.75rem 2rem;font-size:1rem">Browse Courses</a>
+    <a href="/login/"  class="btn btn-outline" style="padding:.75rem 2rem;font-size:1rem">Start Free</a>
+  </div>
+</div>
+
+<!-- ── FILTER BAR ── -->
+<div id="courses" class="filter-bar">
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" class="form-control" id="search" placeholder="Search courses..." oninput="debounceSearch()">
+  </div>
+  <select class="form-select" id="levelFilter" onchange="fetchCourses()">
+    <option value="">All Levels</option>
+    <option value="Beginner">Beginner</option>
+    <option value="Intermediate">Intermediate</option>
+    <option value="Advanced">Advanced</option>
+  </select>
+  <div class="filter-chips">
+    <button class="chip active" onclick="setCategory('',this)">All</button>
+    <button class="chip" onclick="setCategory('programming',this)">Programming</button>
+    <button class="chip" onclick="setCategory('design',this)">Design</button>
+    <button class="chip" onclick="setCategory('data',this)">Data Science</button>
+    <button class="chip" onclick="setCategory('business',this)">Business</button>
+  </div>
+  <span class="results-info" id="resultsInfo">Loading…</span>
+</div>
+
+<!-- ── COURSE GRID ── -->
+<div class="course-grid" id="courseList">
+  <div class="skeleton-card"><div class="skeleton" style="height:148px"></div><div style="padding:1.25rem;display:flex;flex-direction:column;gap:.75rem"><div class="skeleton" style="height:10px;width:60%"></div><div class="skeleton" style="height:16px"></div><div class="skeleton" style="height:12px;width:80%"></div></div></div>
+  <div class="skeleton-card"><div class="skeleton" style="height:148px"></div><div style="padding:1.25rem;display:flex;flex-direction:column;gap:.75rem"><div class="skeleton" style="height:10px;width:60%"></div><div class="skeleton" style="height:16px"></div><div class="skeleton" style="height:12px;width:80%"></div></div></div>
+  <div class="skeleton-card"><div class="skeleton" style="height:148px"></div><div style="padding:1.25rem;display:flex;flex-direction:column;gap:.75rem"><div class="skeleton" style="height:10px;width:60%"></div><div class="skeleton" style="height:16px"></div><div class="skeleton" style="height:12px;width:80%"></div></div></div>
+</div>
+
+<!-- ── PAGINATION ── -->
+<div class="pagination-wrap" id="pagination"></div>
+
+<script src="/static/js/api.js"></script>
+
+<!-- Inside your index.html <script> section -->
+    <script>
+        let currentPage = 1, currentCategory = '';
+        initNav();
+      
+        async function fetchCourses(page = 1) {
+          currentPage = page;
+          const level = document.getElementById('levelFilter').value;
+          const search = document.getElementById('search').value;
+          const params = new URLSearchParams({ page, level, search });
+          if (currentCategory) params.set('category', currentCategory);
+      
+          const res = await fetch(`/api/courses/?${params}`);
+          const data = await res.json();
+          renderCourses(data); // data.results from DRF
+        }
+      
+        function renderCourses(data) {
+          const list = document.getElementById('courseList');
+          const results = data.results || [];
+          document.getElementById('resultsInfo').textContent = `${data.count || 0} courses found`;
+      
+          if (!results.length) {
+            list.innerHTML = `<div class="empty-state"><h3>No courses found</h3></div>`;
+            return;
+          }
+      
+          list.innerHTML = results.map((c, i) => `
+            <div class="course-card" style="animation-delay:${i * 0.05}s">
+              <div class="card-thumb thumb-${(i % 5) + 1}">
+                <span class="thumb-icon">📚</span>
+                <div class="thumb-badge"><span class="badge badge-${c.level.toLowerCase()}">${c.level}</span></div>
+              </div>
+              <div class="card-body">
+                <span class="card-category">${c.category_name || 'General'}</span>
+                <a href="/course-detail/?id=${c.id}" class="card-title">${c.title}</a>
+                <p class="card-desc">${c.description}</p>
+                <div class="card-footer">
+                  <span class="price-paid">${c.price == 0 ? 'FREE' : '$' + c.price}</span>
+                  <a href="/course-detail/?id=${c.id}" class="btn btn-outline btn-sm">Details →</a>
+                </div>
+              </div>
+            </div>`).join('');
+          renderPagination(data);
+        }
+        fetchCourses();
+    </script>
+
+</body>
+</html>

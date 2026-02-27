@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCMS — Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-base: #0a0b0f; --bg-card: #161820; --bg-elevated: #1c1f28; --bg-hover: #232736;
+      --accent-gold: #f5c842; --accent-gold-dim: #c9a22e; --accent-blue: #4f8ef7;
+      --accent-teal: #2dd4bf; --accent-rose: #fb7185; --accent-purple: #a78bfa;
+      --text-primary: #f0f0f5; --text-secondary: #8b8fa8; --text-muted: #4a4d61;
+      --border: rgba(255,255,255,0.06);
+      --radius-sm: 8px; --radius-md: 14px; --radius-lg: 20px;
+      --font-display: 'Playfair Display', serif; --font-body: 'DM Sans', sans-serif; --font-mono: 'DM Mono', monospace;
+      --nav-height: 68px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); background: var(--bg-base); color: var(--text-primary); min-height: 100vh; display: flex; }
+
+    /* SIDEBAR */
+    .admin-sidebar {
+      width: 240px; flex-shrink: 0;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      min-height: 100vh;
+      position: fixed; top: 0; left: 0;
+      z-index: 100;
+      display: flex; flex-direction: column;
+    }
+
+    .sidebar-brand {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 0.7rem;
+      text-decoration: none;
+    }
+
+    .brand-mark {
+      width: 36px; height: 36px; background: var(--accent-gold); border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--bg-base); font-weight: 900; font-size: 0.85rem;
+    }
+
+    .brand-name {
+      font-family: var(--font-display); font-size: 1.25rem; font-weight: 900;
+      color: var(--accent-gold); letter-spacing: -0.02em;
+    }
+
+    .sidebar-section {
+      padding: 1.5rem 1rem 0.5rem;
+    }
+
+    .sidebar-section-label {
+      font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--text-muted); padding: 0 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .sidebar-nav { display: flex; flex-direction: column; gap: 2px; }
+
+    .nav-item {
+      display: flex; align-items: center; gap: 0.7rem;
+      padding: 0.6rem 0.75rem;
+      border-radius: var(--radius-sm);
+      color: var(--text-secondary);
+      font-size: 0.875rem; font-weight: 500;
+      cursor: pointer; transition: all 0.15s;
+      text-decoration: none;
+    }
+
+    .nav-item:hover { background: var(--bg-elevated); color: var(--text-primary); }
+    .nav-item.active { background: rgba(245,200,66,0.1); color: var(--accent-gold); font-weight: 600; }
+
+    .nav-item-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 1.25rem 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .admin-info {
+      display: flex; align-items: center; gap: 0.7rem;
+      padding: 0.75rem;
+      background: var(--bg-elevated);
+      border-radius: var(--radius-sm);
+    }
+
+    .admin-avatar {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, var(--accent-rose), var(--accent-purple));
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 700; color: white; flex-shrink: 0;
+    }
+
+    .admin-name { font-size: 0.82rem; font-weight: 600; }
+    .admin-role { font-size: 0.7rem; color: var(--text-muted); }
+
+    /* MAIN */
+    .admin-main { margin-left: 240px; flex: 1; min-height: 100vh; }
+
+    /* TOP BAR */
+    .admin-topbar {
+      background: rgba(10,11,15,0.92); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 50;
+    }
+
+    .topbar-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem; font-weight: 700;
+    }
+
+    .topbar-right { display: flex; align-items: center; gap: 0.75rem; }
+
+    .cache-badge {
+      display: flex; align-items: center; gap: 0.4rem;
+      background: rgba(45,212,191,0.08); border: 1px solid rgba(45,212,191,0.2);
+      border-radius: 100px; padding: 0.3rem 0.8rem;
+      font-size: 0.72rem; font-weight: 600; color: var(--accent-teal);
+    }
+
+    .cache-dot {
+      width: 6px; height: 6px; background: var(--accent-teal);
+      border-radius: 50%; animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.4rem;
+      padding: 0.5rem 1.1rem; border-radius: var(--radius-sm);
+      font-family: var(--font-body); font-size: 0.82rem; font-weight: 600;
+      border: none; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-ghost { background: var(--bg-elevated); color: var(--text-secondary); }
+    .btn-ghost:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .btn-primary { background: var(--accent-gold); color: var(--bg-base); }
+    .btn-primary:hover { background: var(--accent-gold-dim); }
+
+    /* CONTENT */
+    .admin-content { padding: 2.5rem; }
+
+    /* STATS GRID */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.25rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .stat-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 1.5rem;
+      position: relative; overflow: hidden;
+      transition: all 0.2s;
+      opacity: 0; animation: fadeUp 0.4s ease forwards;
+    }
+
+    .stat-card:hover { border-color: rgba(255,255,255,0.1); box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+    .stat-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+    .stat-card.gold::before { background: linear-gradient(90deg, var(--accent-gold), transparent); }
+    .stat-card.blue::before { background: linear-gradient(90deg, var(--accent-blue), transparent); }
+    .stat-card.teal::before { background: linear-gradient(90deg, var(--accent-teal), transparent); }
+    .stat-card.purple::before { background: linear-gradient(90deg, var(--accent-purple), transparent); }
+
+    .stat-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; }
+    .stat-icon-wrap {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+    .stat-icon-wrap.gold { background: rgba(245,200,66,0.12); }
+    .stat-icon-wrap.blue { background: rgba(79,142,247,0.12); }
+    .stat-icon-wrap.teal { background: rgba(45,212,191,0.12); }
+    .stat-icon-wrap.purple { background: rgba(167,139,250,0.12); }
+
+    .stat-trend { font-size: 0.72rem; font-weight: 600; color: var(--accent-teal); }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 2.2rem; font-weight: 900;
+      letter-spacing: -0.04em; line-height: 1;
+    }
+
+    .stat-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; margin-top: 0.3rem; }
+
+    /* CONTENT GRID */
+    .content-grid { display: grid; grid-template-columns: 1fr 340px; gap: 2rem; }
+
+    /* TABLE */
+    .table-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-md); overflow: hidden;
+    }
+
+    .table-card-header {
+      padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .table-title { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; }
+
+    .ocms-table { width: 100%; border-collapse: collapse; }
+    .ocms-table thead th {
+      padding: 0.7rem 1.5rem;
+      text-align: left; font-size: 0.68rem; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .ocms-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    .ocms-table tbody tr:last-child { border-bottom: none; }
+    .ocms-table tbody tr:hover { background: var(--bg-elevated); }
+    .ocms-table td { padding: 0.875rem 1.5rem; vertical-align: middle; font-size: 0.875rem; }
+
+    .rank-badge {
+      width: 26px; height: 26px;
+      border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 700;
+    }
+    .rank-1 { background: rgba(245,200,66,0.2); color: var(--accent-gold); }
+    .rank-2 { background: rgba(139,143,168,0.15); color: var(--text-secondary); }
+    .rank-3 { background: rgba(201,162,46,0.15); color: #c9a22e; }
+    .rank-other { background: var(--bg-elevated); color: var(--text-muted); }
+
+    .enroll-bar-wrap { display: flex; align-items: center; gap: 0.75rem; }
+    .mini-bar { height: 4px; background: var(--bg-elevated); border-radius: 100px; overflow: hidden; flex: 1; max-width: 100px; }
+    .mini-bar-fill { height: 100%; background: linear-gradient(90deg, var(--accent-blue), var(--accent-teal)); border-radius: 100px; }
+    .enroll-count { font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-secondary); }
+
+    /* MINI CARDS (right column) */
+    .mini-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-md); padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .mini-card-title { font-family: var(--font-display); font-size: 1rem; font-weight: 700; margin-bottom: 1rem; }
+
+    .metric-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 0.65rem 0; border-bottom: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+    .metric-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .metric-label { color: var(--text-muted); }
+    .metric-value { font-weight: 600; }
+    .metric-value.gold { color: var(--accent-gold); }
+    .metric-value.teal { color: var(--accent-teal); }
+    .metric-value.blue { color: var(--accent-blue); }
+
+    /* ACTIVITY FEED */
+    .activity-item {
+      display: flex; gap: 0.75rem; align-items: flex-start;
+      padding: 0.75rem 0; border-bottom: 1px solid var(--border);
+      font-size: 0.82rem;
+    }
+    .activity-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .activity-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      margin-top: 0.35rem; flex-shrink: 0;
+    }
+    .activity-text { color: var(--text-secondary); line-height: 1.5; }
+    .activity-text strong { color: var(--text-primary); }
+    .activity-time { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.15rem; }
+
+    /* CHART PLACEHOLDER */
+    .chart-area {
+      height: 140px; margin-top: 1rem;
+      display: flex; align-items: flex-end; gap: 6px;
+    }
+    .bar-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .bar-fill {
+      width: 100%; border-radius: 4px 4px 0 0;
+      background: linear-gradient(to top, var(--accent-blue), var(--accent-teal));
+      opacity: 0.7; transition: opacity 0.15s;
+    }
+    .bar-fill:hover { opacity: 1; }
+    .bar-label { font-size: 0.6rem; color: var(--text-muted); }
+
+    /* SKELETON */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-elevated) 25%, var(--bg-hover) 50%, var(--bg-elevated) 75%);
+      background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px;
+    }
+    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 1024px) { .content-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) { .admin-sidebar { display: none; } .admin-main { margin-left: 0; } }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg-base); }
+    ::-webkit-scrollbar-thumb { background: var(--bg-hover); border-radius: 100px; }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="admin-sidebar">
+  <a href="/" class="sidebar-brand">
+    <div class="brand-mark">OC</div>
+    <span class="brand-name">OCMS</span>
+  </a>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Overview</div>
+    <nav class="sidebar-nav">
+      <a class="nav-item active" href="#">
+        <span class="nav-item-icon">📊</span>
+        Analytics
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-item-icon">👥</span>
+        Users
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-item-icon">📚</span>
+        Courses
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-item-icon">📝</span>
+        Enrollments
+      </a>
+    </nav>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Management</div>
+    <nav class="sidebar-nav">
+      <a class="nav-item" href="#">
+        <span class="nav-item-icon">⭐</span>
+        Reviews
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-item-icon">🏷️</span>
+        Categories
+      </a>
+      <a class="nav-item" href="#">
+        <span class="nav-item-icon">⚙️</span>
+        Settings
+      </a>
+    </nav>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="admin-info">
+      <div class="admin-avatar">SA</div>
+      <div>
+        <div class="admin-name">Super Admin</div>
+        <div class="admin-role">Administrator</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN AREA -->
+<div class="admin-main">
+  <!-- TOPBAR -->
+  <div class="admin-topbar">
+    <div class="topbar-title">Platform Analytics</div>
+    <div class="topbar-right">
+      <div class="cache-badge">
+        <div class="cache-dot"></div>
+        Redis Live
+      </div>
+      <button class="btn btn-ghost" onclick="loadStats()">↻ Refresh</button>
+      <button class="btn btn-primary">Export Report</button>
+    </div>
+  </div>
+
+  <div class="admin-content">
+
+    <!-- STATS GRID -->
+    <div class="stats-grid" id="statsRow">
+      <div class="stat-card gold" style="animation-delay:.05s">
+        <div class="stat-header">
+          <div class="stat-icon-wrap gold">👥</div>
+          <span class="stat-trend">↑ 12%</span>
+        </div>
+        <div class="stat-value skeleton" id="totalUsers" style="height:40px;width:80%"></div>
+        <div class="stat-label">Total Users</div>
+      </div>
+      <div class="stat-card blue" style="animation-delay:.1s">
+        <div class="stat-header">
+          <div class="stat-icon-wrap blue">📚</div>
+          <span class="stat-trend">↑ 8%</span>
+        </div>
+        <div class="stat-value skeleton" id="totalCourses" style="height:40px;width:70%"></div>
+        <div class="stat-label">Total Courses</div>
+      </div>
+      <div class="stat-card teal" style="animation-delay:.15s">
+        <div class="stat-header">
+          <div class="stat-icon-wrap teal">📝</div>
+          <span class="stat-trend">↑ 23%</span>
+        </div>
+        <div class="stat-value skeleton" id="totalEnrollments" style="height:40px;width:75%"></div>
+        <div class="stat-label">Total Enrollments</div>
+      </div>
+      <div class="stat-card purple" style="animation-delay:.2s">
+        <div class="stat-header">
+          <div class="stat-icon-wrap purple">⭐</div>
+          <span class="stat-trend" style="color:var(--accent-gold)">Excellent</span>
+        </div>
+        <div class="stat-value" id="avgRating" style="color:var(--accent-gold)">4.8</div>
+        <div class="stat-label">Platform Rating</div>
+      </div>
+    </div>
+
+    <!-- CONTENT GRID -->
+    <div class="content-grid">
+
+      <!-- TOP COURSES TABLE -->
+      <div>
+        <div class="table-card">
+          <div class="table-card-header">
+            <span class="table-title">🏆 Top Performing Courses</span>
+            <span style="font-size:.75rem;color:var(--text-muted)">By enrollment count</span>
+          </div>
+          <table class="ocms-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Course</th>
+                <th>Level</th>
+                <th>Enrollments</th>
+                <th>Rating</th>
+              </tr>
+            </thead>
+            <tbody id="topCoursesTable">
+              <tr><td colspan="5" style="padding:2rem;text-align:center;color:var(--text-muted);font-size:.875rem">Loading top courses…</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- ENROLLMENT CHART -->
+        <div class="table-card" style="margin-top:1.25rem">
+          <div class="table-card-header">
+            <span class="table-title">📈 Monthly Enrollments</span>
+            <span style="font-size:.75rem;color:var(--text-muted)">Last 8 months</span>
+          </div>
+          <div style="padding:1.5rem">
+            <div class="chart-area" id="chartArea"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div>
+        <!-- PLATFORM HEALTH -->
+        <div class="mini-card">
+          <div class="mini-card-title">🏥 Platform Health</div>
+          <div class="metric-row">
+            <span class="metric-label">API Response Time</span>
+            <span class="metric-value teal">42ms</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Redis Cache Hit Rate</span>
+            <span class="metric-value gold">94.2%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">DB Query Time (avg)</span>
+            <span class="metric-value">18ms</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Active Sessions</span>
+            <span class="metric-value blue" id="activeSessions">–</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Error Rate</span>
+            <span class="metric-value teal">0.08%</span>
+          </div>
+        </div>
+
+        <!-- DISTRIBUTION -->
+        <div class="mini-card">
+          <div class="mini-card-title">👥 User Distribution</div>
+          <div class="metric-row">
+            <span class="metric-label">Students</span>
+            <span class="metric-value" id="distStudents">–</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Instructors</span>
+            <span class="metric-value" id="distInstructors">–</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Completion Rate</span>
+            <span class="metric-value teal">68%</span>
+          </div>
+          <div class="metric-row">
+            <span class="metric-label">Free Courses</span>
+            <span class="metric-value" id="distFree">–</span>
+          </div>
+        </div>
+
+        <!-- RECENT ACTIVITY -->
+        <div class="mini-card">
+          <div class="mini-card-title">⚡ Recent Activity</div>
+          <div id="activityFeed">
+            <div class="activity-item">
+              <div class="activity-dot" style="background:var(--accent-teal)"></div>
+              <div><div class="activity-text"><strong>Alex K.</strong> enrolled in Python for DS</div><div class="activity-time">2 min ago</div></div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot" style="background:var(--accent-gold)"></div>
+              <div><div class="activity-text"><strong>Priya M.</strong> published a new course</div><div class="activity-time">8 min ago</div></div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot" style="background:var(--accent-blue)"></div>
+              <div><div class="activity-text"><strong>Jordan L.</strong> left a 5-star review</div><div class="activity-time">15 min ago</div></div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot" style="background:var(--accent-purple)"></div>
+              <div><div class="activity-text"><strong>Sam R.</strong> completed Full Stack course</div><div class="activity-time">22 min ago</div></div>
+            </div>
+            <div class="activity-item">
+              <div class="activity-dot" style="background:var(--accent-rose)"></div>
+              <div><div class="activity-text"><strong>Maria T.</strong> registered as Instructor</div><div class="activity-time">1 hr ago</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/api.js"></script>
+<!-- Inside admin-dashboard.html <script> section -->
+<script>
+  requireAuth();
+  if (auth.role() !== "ADMIN") window.location.href = "/";
+
+  async function loadStats() {
+    const res = await api.call('/admin/analytics/');
+    const stats = await res.json();
+    
+    document.getElementById('totalUsers').textContent = stats.total_users;
+    document.getElementById('totalCourses').textContent = stats.total_courses;
+    document.getElementById('totalEnrollments').textContent = stats.total_enrollments;
+
+    const topRes = await api.call('/admin/top-courses/');
+    const topData = await topRes.json();
+    document.getElementById('topCoursesTable').innerHTML = topData.map((c, i) => `
+      <tr>
+        <td><div class="rank-badge rank-${i+1}">${i+1}</div></td>
+        <td><strong>${c.course_id__title}</strong></td>
+        <td>${c.enrollment_count} students</td>
+        <td class="text-primary">★ 4.9</td>
+      </tr>`).join('');
+  }
+  loadStats();
+</script>
+
+</body>
+</html>

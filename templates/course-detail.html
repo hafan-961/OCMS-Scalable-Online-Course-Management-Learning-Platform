@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCMS — Course Details</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg-base:#0a0b0f;--bg-card:#161820;--bg-elevated:#1c1f28;--bg-hover:#232736;--accent-gold:#f5c842;--accent-gold-dim:#c9a22e;--accent-blue:#4f8ef7;--accent-teal:#2dd4bf;--accent-rose:#fb7185;--text-primary:#f0f0f5;--text-secondary:#8b8fa8;--text-muted:#4a4d61;--border:rgba(255,255,255,0.06);--radius-sm:8px;--radius-md:14px;--radius-lg:20px;--font-display:'Playfair Display',serif;--font-body:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace;--nav-height:68px}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font-body);background:var(--bg-base);color:var(--text-primary);min-height:100vh}
+    .ocms-nav{position:fixed;top:0;left:0;right:0;height:var(--nav-height);background:rgba(10,11,15,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 2.5rem;z-index:1000;gap:2rem}
+    .nav-logo{font-family:var(--font-display);font-size:1.35rem;font-weight:900;color:var(--accent-gold);text-decoration:none;letter-spacing:-.02em;display:flex;align-items:center;gap:.6rem}
+    .nav-logo-mark{width:34px;height:34px;background:var(--accent-gold);border-radius:9px;display:flex;align-items:center;justify-content:center;color:var(--bg-base);font-weight:900;font-size:.85rem}
+    .nav-links{display:flex;gap:.1rem;list-style:none;flex:1}
+    .nav-links a{color:var(--text-secondary);text-decoration:none;padding:.45rem 1rem;border-radius:6px;font-size:.875rem;font-weight:500;transition:all .18s}
+    .nav-links a:hover{color:var(--text-primary);background:var(--bg-elevated)}
+    .nav-right{margin-left:auto;display:flex;align-items:center;gap:.75rem}
+    .nav-avatar{width:34px;height:34px;background:linear-gradient(135deg,var(--accent-blue),var(--accent-teal));border-radius:50%;display:none;align-items:center;justify-content:center;font-size:.78rem;font-weight:600;color:white;cursor:pointer;text-decoration:none}
+    .nav-logout{background:transparent;border:none;color:var(--text-muted);cursor:pointer;font-family:var(--font-body);font-size:.8rem;display:none;padding:.3rem .6rem;border-radius:6px;transition:all .15s}
+    .nav-logout:hover{color:var(--accent-rose)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.55rem 1.25rem;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:.875rem;font-weight:600;border:none;cursor:pointer;transition:all .2s;text-decoration:none}
+    .btn-primary{background:var(--accent-gold);color:var(--bg-base)}
+    .btn-primary:hover{background:var(--accent-gold-dim);transform:translateY(-1px);box-shadow:0 4px 20px rgba(245,200,66,.25)}
+    .btn-ghost{background:var(--bg-elevated);color:var(--text-secondary)}
+    .btn-ghost:hover{background:var(--bg-hover);color:var(--text-primary)}
+    .btn-sm{padding:.4rem .9rem;font-size:.8rem}
+    /* HERO */
+    .course-hero{margin-top:var(--nav-height);background:linear-gradient(135deg,#0d0f1a 0%,#111628 100%);border-bottom:1px solid var(--border);padding:4rem 0 3rem;position:relative;overflow:hidden}
+    .course-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 100% at 80% 50%,rgba(79,142,247,.08) 0%,transparent 70%)}
+    .hero-inner{max-width:1280px;margin:0 auto;padding:0 2.5rem;display:grid;grid-template-columns:1fr 340px;gap:3rem;align-items:start;position:relative}
+    @media(max-width:1024px){.hero-inner,.course-content{grid-template-columns:1fr}.enroll-card{position:static}}
+    .breadcrumb{display:flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--text-muted);margin-bottom:1rem}
+    .breadcrumb a{color:var(--text-muted);text-decoration:none;transition:color .15s}
+    .breadcrumb a:hover{color:var(--accent-gold)}
+    .course-hero-title{font-family:var(--font-display);font-size:clamp(1.8rem,4vw,2.75rem);font-weight:900;line-height:1.12;letter-spacing:-.04em;margin-bottom:1rem}
+    .course-hero-desc{font-size:1rem;color:var(--text-secondary);line-height:1.7;margin-bottom:1.5rem;max-width:580px}
+    .hero-meta{display:flex;flex-wrap:wrap;gap:1.25rem;margin-bottom:1rem}
+    .hero-meta-item{display:flex;align-items:center;gap:.4rem;font-size:.85rem;color:var(--text-secondary)}
+    .stars{display:flex;gap:2px;color:var(--accent-gold);font-size:.85rem}
+    .badge{display:inline-flex;align-items:center;padding:.25rem .75rem;border-radius:100px;font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+    .badge-beginner{background:rgba(45,212,191,.12);color:#2dd4bf;border:1px solid rgba(45,212,191,.2)}
+    .badge-intermediate{background:rgba(79,142,247,.12);color:#4f8ef7;border:1px solid rgba(79,142,247,.2)}
+    .badge-advanced{background:rgba(251,113,133,.12);color:#fb7185;border:1px solid rgba(251,113,133,.2)}
+    /* ENROLL CARD */
+    .enroll-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;position:sticky;top:calc(var(--nav-height) + 1rem)}
+    .enroll-thumb{height:180px;display:flex;align-items:center;justify-content:center;font-size:4rem;background:linear-gradient(135deg,#1a1040,#2d1b69)}
+    .enroll-body{padding:1.5rem}
+    .enroll-price{font-family:var(--font-display);font-size:2.2rem;font-weight:900;letter-spacing:-.03em;margin-bottom:.25rem}
+    .enroll-price.free{color:var(--accent-teal)}.enroll-price.paid{color:var(--accent-gold)}
+    .enroll-price-sub{font-size:.78rem;color:var(--text-muted);margin-bottom:1.25rem}
+    .enroll-btn{width:100%;padding:1rem;font-size:1rem;font-weight:700;border-radius:var(--radius-sm);border:none;cursor:pointer;background:var(--accent-gold);color:var(--bg-base);font-family:var(--font-body);transition:all .2s;margin-bottom:.75rem}
+    .enroll-btn:hover{background:var(--accent-gold-dim);box-shadow:0 6px 24px rgba(245,200,66,.3)}
+    .enroll-btn:disabled{opacity:.5;cursor:default}
+    .enroll-btn.enrolled{background:rgba(45,212,191,.1);color:var(--accent-teal);border:1px solid rgba(45,212,191,.2)}
+    .enroll-perks{margin-top:1.25rem;display:flex;flex-direction:column;gap:.6rem}
+    .perk{display:flex;align-items:center;gap:.6rem;font-size:.82rem;color:var(--text-secondary)}
+    .perk-icon{color:var(--accent-teal)}
+    /* MAIN */
+    .course-content{max-width:1280px;margin:0 auto;padding:2.5rem;display:grid;grid-template-columns:1fr 340px;gap:3rem}
+    .section-title{font-family:var(--font-display);font-size:1.3rem;font-weight:700;letter-spacing:-.02em;margin-bottom:1.25rem;padding-bottom:.75rem;border-bottom:1px solid var(--border)}
+    .module-block{margin-bottom:.5rem;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;transition:border-color .2s}
+    .module-block:hover{border-color:rgba(255,255,255,.1)}
+    .module-header{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.25rem;cursor:pointer;user-select:none}
+    .module-title{font-weight:700;font-size:.95rem;display:flex;align-items:center;gap:.6rem}
+    .module-num{width:24px;height:24px;background:var(--bg-elevated);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:var(--text-muted)}
+    .module-count{font-size:.78rem;color:var(--text-muted)}
+    .module-chevron{color:var(--text-muted);transition:transform .2s}
+    .module-block.open .module-chevron{transform:rotate(180deg)}
+    .lectures-list{border-top:1px solid var(--border);display:none}
+    .module-block.open .lectures-list{display:block}
+    .lecture-item{display:flex;align-items:center;gap:.75rem;padding:.8rem 1.25rem;border-bottom:1px solid var(--border);transition:background .15s}
+    .lecture-item:last-child{border-bottom:none}
+    .lecture-item:hover{background:var(--bg-elevated)}
+    .lecture-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0}
+    .lecture-icon.video{background:rgba(79,142,247,.12);color:var(--accent-blue)}
+    .lecture-icon.locked{background:var(--bg-elevated);color:var(--text-muted)}
+    .lecture-title{font-size:.875rem;flex:1}
+    .lecture-locked{color:var(--text-muted)}
+    .lecture-duration{font-family:var(--font-mono);font-size:.75rem;color:var(--text-muted)}
+    .review-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1.25rem;margin-bottom:1rem}
+    .review-header{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem}
+    .review-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:white;flex-shrink:0}
+    .review-name{font-size:.875rem;font-weight:600}
+    .review-text{font-size:.875rem;color:var(--text-secondary);line-height:1.6}
+    /* TOAST */
+    .toast{position:fixed;bottom:2rem;right:2rem;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem 1.5rem;display:flex;align-items:center;gap:.75rem;box-shadow:0 8px 32px rgba(0,0,0,.4);z-index:9999;transform:translateY(100px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);min-width:280px}
+    .toast.show{transform:translateY(0);opacity:1}
+    .toast.success{border-left:3px solid var(--accent-teal)}.toast.error{border-left:3px solid var(--accent-rose)}
+    .skeleton{background:linear-gradient(90deg,var(--bg-elevated) 25%,var(--bg-hover) 50%,var(--bg-elevated) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:6px}
+    @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg-base)}::-webkit-scrollbar-thumb{background:var(--bg-hover);border-radius:100px}
+  </style>
+</head>
+<body>
+<nav class="ocms-nav">
+  <a href="/" class="nav-logo"><div class="nav-logo-mark">OC</div>OCMS</a>
+  <ul class="nav-links">
+    <li><a href="/">Explore</a></li>
+    <li><a href="/dashboard/">My Learning</a></li>
+  </ul>
+  <div class="nav-right">
+    <a href="/login/" class="btn btn-ghost btn-sm" id="navLoginBtn">Sign In</a>
+    <a href="/dashboard/" class="nav-avatar" id="navAvatar">JD</a>
+    <button class="nav-logout" id="navLogoutBtn">Sign out</button>
+  </div>
+</nav>
+
+<div class="course-hero" id="courseHero">
+  <div class="hero-inner">
+    <div>
+      <div class="breadcrumb">
+        <a href="/">Home</a><span>/</span>
+        <a href="/">Courses</a><span>/</span>
+        <span id="heroCategory">Loading…</span>
+      </div>
+      <h1 class="course-hero-title" id="courseTitle"><span class="skeleton" style="display:block;height:48px;width:70%"></span></h1>
+      <p class="course-hero-desc" id="courseDesc"></p>
+      <div class="hero-meta" id="heroMeta"></div>
+      <div id="heroBadge"></div>
+    </div>
+    <div class="enroll-card">
+      <div class="enroll-thumb" id="enrollThumb">📚</div>
+      <div class="enroll-body">
+        <div class="enroll-price" id="enrollPrice">–</div>
+        <div class="enroll-price-sub">Lifetime access · All devices</div>
+        <button class="enroll-btn" id="enrollBtn" onclick="handleEnroll()">→ Enroll Now</button>
+        <div id="enrollMsg" style="font-size:.8rem;color:var(--accent-teal);text-align:center;min-height:1.2rem"></div>
+        <div class="enroll-perks">
+          <div class="perk"><span class="perk-icon">✓</span> Full lifetime access</div>
+          <div class="perk"><span class="perk-icon">✓</span> Certificate of completion</div>
+          <div class="perk"><span class="perk-icon">✓</span> Mobile & desktop access</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="course-content">
+  <div>
+    <h2 class="section-title">Course Curriculum</h2>
+    <div id="curriculumList"><div class="skeleton" style="height:60px;margin-bottom:.5rem;border-radius:var(--radius-md)"></div><div class="skeleton" style="height:60px;border-radius:var(--radius-md)"></div></div>
+    <div style="margin-top:3rem">
+      <h2 class="section-title">Student Reviews</h2>
+      <div id="reviewsList"></div>
+    </div>
+  </div>
+  <div>
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1.5rem;margin-bottom:1rem">
+      <h3 style="font-family:var(--font-display);font-size:1rem;font-weight:700;margin-bottom:1.25rem">Your Instructor</h3>
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1rem">
+        <div style="width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#4f8ef7,#2dd4bf);display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;color:white;flex-shrink:0" id="instructorAvatar">?</div>
+        <div><div style="font-weight:700;font-size:.9rem" id="instructorName">Loading…</div><div style="font-size:.75rem;color:var(--text-muted)">Course Instructor</div></div>
+      </div>
+    </div>
+    <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1.5rem">
+      <h3 style="font-family:var(--font-display);font-size:1rem;font-weight:700;margin-bottom:1.25rem">Course Details</h3>
+      <div style="display:flex;justify-content:space-between;font-size:.85rem;padding:.6rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted)">Level</span><span id="detailLevel" style="font-weight:600">—</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:.85rem;padding:.6rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-muted)">Category</span><span id="detailCategory" style="font-weight:600">—</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:.85rem;padding:.6rem 0"><span style="color:var(--text-muted)">Certificate</span><span style="font-weight:600;color:var(--accent-teal)">✓ Included</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="toastIcon">✓</span><span id="toastText"></span></div>
+
+<script src="/static/js/api.js"></script>
+<script>
+  initNav();
+  const courseId = new URLSearchParams(window.location.search).get('id') || 1;
+  const ICONS  = ['📚','💻','🎨','📊','🚀','🔬'];
+  const BG     = ['linear-gradient(135deg,#1a1040,#2d1b69)','linear-gradient(135deg,#0f2027,#2c5364)','linear-gradient(135deg,#0a1a0a,#153d15)'];
+  let enrolled = false;
+
+  function showToast(msg,type='success'){
+    const t=document.getElementById('toast');
+    document.getElementById('toastIcon').textContent = type==='success'?'✓':'✗';
+    document.getElementById('toastText').textContent = msg;
+    t.className=`toast show ${type}`;
+    setTimeout(()=>{ t.className=`toast ${type}`; },3500);
+  }
+
+  function fmt(s){ if(!s)return'—'; const m=Math.floor(s/60); return m>0?`${m}m`:`${s}s`; }
+
+  async function loadCourse(){
+    try{
+      const res    = await fetch(`/api/courses/${courseId}/`);
+      const course = await res.json();
+      renderCourse(course);
+    }catch(e){
+      renderCourse({id:courseId,title:'Full Stack Web Development',description:'Build real-world production-grade web applications from scratch.',level:'Intermediate',price:79,category_name:'Programming',instructor_name:'Marcus Chen'});
+    }
+    try{
+      const r = await fetch(`/api/courses/${courseId}/modules/`);
+      const m = await r.json();
+      renderCurriculum(m);
+    }catch(e){
+      renderCurriculum([
+        {id:1,title:'Getting Started',order:1,lectures:[{id:1,title:'Introduction & Setup',duration:480,order:1},{id:2,title:'Project Overview',duration:600,order:2}]},
+        {id:2,title:'Core Fundamentals',order:2,lectures:[{id:3,title:'HTML & CSS',duration:1800,order:1},{id:4,title:'JavaScript Basics',duration:2400,order:2},{id:5,title:'Django Setup',duration:3600,order:3}]},
+        {id:3,title:'Building the API',order:3,lectures:[{id:6,title:'Models & Migrations',duration:2100,order:1},{id:7,title:'Serializers',duration:1800,order:2},{id:8,title:'Views & URLs',duration:2700,order:3}]},
+      ]);
+    }
+    renderReviews();
+  }
+
+  function renderCourse(c){
+    document.title = `OCMS — ${c.title}`;
+    document.getElementById('courseTitle').innerHTML = c.title;
+    document.getElementById('courseDesc').textContent = c.description;
+    document.getElementById('heroCategory').textContent = c.category_name||'Course';
+    document.getElementById('detailLevel').textContent    = c.level||'—';
+    document.getElementById('detailCategory').textContent = c.category_name||'—';
+    document.getElementById('enrollThumb').textContent = ICONS[courseId%ICONS.length];
+    document.getElementById('enrollThumb').style.background = BG[courseId%BG.length];
+    const free = c.price==0;
+    const pe   = document.getElementById('enrollPrice');
+    pe.textContent = free ? 'FREE' : `$${c.price}`;
+    pe.className   = `enroll-price ${free?'free':'paid'}`;
+    document.getElementById('enrollBtn').textContent = free ? '→ Enroll for Free' : `→ Enroll for $${c.price}`;
+    document.getElementById('heroBadge').innerHTML = `<span class="badge badge-${(c.level||'').toLowerCase()}" style="margin-top:.5rem">${c.level||''}</span>`;
+    document.getElementById('heroMeta').innerHTML = `
+      <div class="hero-meta-item"><div class="stars">★★★★★</div><span>4.8 (124)</span></div>
+      <div class="hero-meta-item">By <strong>${c.instructor_name||'Instructor'}</strong></div>`;
+    const ini = (c.instructor_name||'?').split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('instructorAvatar').textContent = ini;
+    document.getElementById('instructorName').textContent   = c.instructor_name||'Instructor';
+  }
+
+  function renderCurriculum(modules){
+    const c = document.getElementById('curriculumList');
+    if(!modules?.length){ c.innerHTML='<p style="color:var(--text-muted);font-size:.875rem">No curriculum yet.</p>'; return; }
+    c.innerHTML = modules.map((m,idx)=>{
+      const lc = m.lectures?.length||0;
+      return `
+        <div class="module-block ${idx===0?'open':''}">
+          <div class="module-header" onclick="this.parentElement.classList.toggle('open')">
+            <div class="module-title"><span class="module-num">${m.order||idx+1}</span>${m.title}</div>
+            <div style="display:flex;align-items:center;gap:.75rem">
+              <span class="module-count">${lc} lecture${lc!==1?'s':''}</span>
+              <svg class="module-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+            </div>
+          </div>
+          <div class="lectures-list">
+            ${m.lectures?.map((l,li)=>`
+              <div class="lecture-item">
+                <div class="lecture-icon ${li<2?'video':'locked'}">${li<2?'▷':'🔒'}</div>
+                <span class="lecture-title ${li<2?'':'lecture-locked'}">${l.title}</span>
+                <span class="lecture-duration">${fmt(l.duration)}</span>
+              </div>`).join('')||'<div class="lecture-item" style="color:var(--text-muted)">No lectures yet</div>'}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderReviews(){
+    document.getElementById('reviewsList').innerHTML = [
+      {n:'Alex Kim',r:5,c:'Absolutely fantastic. The instructor explains concepts clearly.',a:'linear-gradient(135deg,#4f8ef7,#2dd4bf)',i:'AK',d:'2 weeks ago'},
+      {n:'Priya Mehta',r:5,c:'Best investment this year. Built real apps in 3 months.',a:'linear-gradient(135deg,#fb7185,#f5c842)',i:'PM',d:'1 month ago'},
+    ].map(r=>`
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-avatar" style="background:${r.a}">${r.i}</div>
+          <div><div class="review-name">${r.n}</div><div class="stars">${'★'.repeat(r.r)}</div></div>
+          <span style="margin-left:auto;font-size:.75rem;color:var(--text-muted)">${r.d}</span>
+        </div>
+        <p class="review-text">${r.c}</p>
+      </div>`).join('');
+  }
+
+  async function handleEnroll(){
+    if(enrolled) return;
+    if(!auth.isLoggedIn()){ showToast('Please sign in to enroll','error'); setTimeout(()=>window.location.href='/login/',1200); return; }
+    const btn = document.getElementById('enrollBtn');
+    btn.disabled = true; btn.textContent = 'Enrolling…';
+    try{
+      const res = await api.call('/enroll/','POST',{ course_id: courseId });
+      if(res.ok){
+        enrolled = true;
+        btn.textContent = '✓ Enrolled! Go to Dashboard';
+        btn.className   = 'enroll-btn enrolled';
+        btn.disabled    = false;
+        btn.onclick     = ()=> window.location.href='/dashboard/';
+        showToast('Successfully enrolled! Start learning now.','success');
+      } else {
+        const d = await res.json();
+        showToast(d.detail||'Already enrolled or error.','error');
+        btn.disabled=false; btn.textContent='→ Enroll Now';
+      }
+    }catch(e){
+      showToast('Connection error.','error');
+      btn.disabled=false; btn.textContent='→ Enroll Now';
+    }
+  }
+
+  loadCourse();
+</script>
+</body>
+</html>

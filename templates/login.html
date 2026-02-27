@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCMS — Sign In</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root{--bg-base:#0a0b0f;--bg-card:#161820;--bg-elevated:#1c1f28;--bg-hover:#232736;--accent-gold:#f5c842;--accent-gold-dim:#c9a22e;--accent-blue:#4f8ef7;--accent-teal:#2dd4bf;--accent-rose:#fb7185;--text-primary:#f0f0f5;--text-secondary:#8b8fa8;--text-muted:#4a4d61;--border:rgba(255,255,255,0.06);--radius-sm:8px;--radius-md:14px;--radius-lg:20px;--font-display:'Playfair Display',serif;--font-body:'DM Sans',sans-serif}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font-body);background:var(--bg-base);color:var(--text-primary);min-height:100vh;display:flex;overflow:hidden}
+    .bg-art{position:fixed;inset:0;z-index:0}
+    .bg-art::before{content:'';position:absolute;top:-30%;left:-20%;width:80%;height:80%;background:radial-gradient(ellipse,rgba(79,142,247,.08) 0%,transparent 70%);animation:drift1 20s ease-in-out infinite}
+    .bg-art::after{content:'';position:absolute;bottom:-30%;right:-20%;width:70%;height:70%;background:radial-gradient(ellipse,rgba(245,200,66,.06) 0%,transparent 70%);animation:drift2 25s ease-in-out infinite}
+    @keyframes drift1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(5%,3%) scale(1.05)}}
+    @keyframes drift2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-5%,-3%) scale(1.08)}}
+    .auth-split{display:flex;width:100%;min-height:100vh;position:relative;z-index:1}
+    /* LEFT */
+    .panel-left{flex:1;display:flex;flex-direction:column;justify-content:center;padding:4rem 5rem;position:relative;overflow:hidden}
+    .panel-left::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(79,142,247,.04) 0%,transparent 60%)}
+    .panel-left-content{position:relative;max-width:460px}
+    .brand{display:flex;align-items:center;gap:.75rem;margin-bottom:4rem;text-decoration:none}
+    .brand-mark{width:40px;height:40px;background:var(--accent-gold);border-radius:11px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:900;color:var(--bg-base);font-size:.9rem}
+    .brand-name{font-family:var(--font-display);font-size:1.4rem;font-weight:900;color:var(--accent-gold);letter-spacing:-.02em}
+    .panel-headline{font-family:var(--font-display);font-size:clamp(2rem,4vw,3rem);font-weight:900;line-height:1.1;letter-spacing:-.04em;margin-bottom:1.25rem}
+    .panel-headline em{font-style:italic;color:var(--accent-gold)}
+    .panel-sub{font-size:1rem;color:var(--text-secondary);line-height:1.7;margin-bottom:3rem}
+    .testimonials{display:flex;flex-direction:column;gap:1rem}
+    .testimonial{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1.25rem 1.5rem;transition:transform .3s}
+    .testimonial:hover{transform:translateX(4px)}
+    .stars{display:flex;gap:2px;color:var(--accent-gold);font-size:.7rem;margin-bottom:.5rem}
+    .testimonial-text{font-size:.875rem;color:var(--text-secondary);line-height:1.6;font-style:italic;margin-bottom:.75rem}
+    .testimonial-author{display:flex;align-items:center;gap:.65rem}
+    .author-avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:white}
+    .author-name{font-size:.78rem;font-weight:600;color:var(--text-primary)}
+    .author-role{font-size:.72rem;color:var(--text-muted)}
+    .stats-row{display:flex;gap:2rem;margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border)}
+    .stat-number{font-family:var(--font-display);font-size:1.6rem;font-weight:900;letter-spacing:-.03em}
+    .stat-label{font-size:.75rem;color:var(--text-muted);font-weight:500}
+    /* RIGHT */
+    .panel-right{width:480px;min-height:100vh;background:var(--bg-card);border-left:1px solid var(--border);display:flex;flex-direction:column;justify-content:center;padding:3rem 3.5rem;overflow-y:auto}
+    .form-header{margin-bottom:2rem}
+    .form-title{font-family:var(--font-display);font-size:1.9rem;font-weight:900;letter-spacing:-.03em;margin-bottom:.4rem}
+    .form-sub{font-size:.875rem;color:var(--text-secondary)}
+    .form-sub a{color:var(--accent-gold);text-decoration:none;font-weight:600}
+    .tab-row{display:flex;background:var(--bg-elevated);border-radius:var(--radius-sm);padding:4px;margin-bottom:2rem;gap:4px}
+    .tab-btn{flex:1;padding:.5rem;border-radius:6px;border:none;background:transparent;color:var(--text-muted);font-family:var(--font-body);font-size:.875rem;font-weight:600;cursor:pointer;transition:all .2s}
+    .tab-btn.active{background:var(--bg-card);color:var(--text-primary);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+    .auth-form{display:flex;flex-direction:column;gap:1.25rem}
+    .form-group{display:flex;flex-direction:column;gap:.4rem}
+    .form-label{font-size:.78rem;font-weight:600;color:var(--text-secondary);letter-spacing:.05em;text-transform:uppercase}
+    .input-wrap{position:relative}
+    .input-icon{position:absolute;left:.9rem;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none}
+    .form-input{width:100%;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);padding:.75rem 1rem .75rem 2.5rem;font-family:var(--font-body);font-size:.9rem;transition:all .2s;outline:none}
+    .form-input:focus{border-color:rgba(245,200,66,.5);box-shadow:0 0 0 3px rgba(245,200,66,.08)}
+    .form-input::placeholder{color:var(--text-muted)}
+    .pw-toggle{position:absolute;right:.9rem;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);cursor:pointer;padding:0}
+    .role-select{display:flex;gap:.5rem}
+    .role-btn{flex:1;padding:.65rem;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-elevated);color:var(--text-muted);font-family:var(--font-body);font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;text-align:center}
+    .role-btn.active{border-color:var(--accent-gold);color:var(--accent-gold);background:rgba(245,200,66,.08)}
+    .forgot-row{display:flex;justify-content:flex-end}
+    .forgot-link{font-size:.8rem;color:var(--text-muted);text-decoration:none}
+    .forgot-link:hover{color:var(--accent-gold)}
+    .btn-submit{width:100%;padding:.85rem;background:var(--accent-gold);color:var(--bg-base);border:none;border-radius:var(--radius-sm);font-family:var(--font-body);font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s}
+    .btn-submit:hover{background:var(--accent-gold-dim);transform:translateY(-1px);box-shadow:0 6px 24px rgba(245,200,66,.3)}
+    .btn-submit.loading{pointer-events:none;opacity:.7}
+    .btn-submit.loading .btn-text{display:none}
+    .btn-submit.loading .btn-spinner{display:inline}
+    .btn-spinner{display:none}
+    .error-banner{background:rgba(251,113,133,.08);border:1px solid rgba(251,113,133,.2);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:.85rem;color:var(--accent-rose);display:none}
+    .error-banner.show{display:block}
+    .success-banner{background:rgba(45,212,191,.08);border:1px solid rgba(45,212,191,.2);border-radius:var(--radius-sm);padding:.75rem 1rem;font-size:.85rem;color:var(--accent-teal);display:none}
+    .success-banner.show{display:block}
+    .terms-text{font-size:.75rem;color:var(--text-muted);text-align:center;line-height:1.6}
+    .terms-text a{color:var(--text-secondary);text-decoration:none}
+    @media(max-width:900px){.panel-left{display:none}.panel-right{width:100%;border-left:none}}
+    ::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg-base)}::-webkit-scrollbar-thumb{background:var(--bg-hover);border-radius:100px}
+  </style>
+</head>
+<body>
+<div class="bg-art"></div>
+<div class="auth-split">
+
+  <!-- LEFT -->
+  <div class="panel-left">
+    <div class="panel-left-content">
+      <a href="/" class="brand">
+        <div class="brand-mark">OC</div>
+        <span class="brand-name">OCMS</span>
+      </a>
+      <h1 class="panel-headline">Learn Without<br><em>Limits.</em></h1>
+      <p class="panel-sub">Join thousands of learners mastering in-demand skills from world-class instructors.</p>
+      <div class="testimonials">
+        <div class="testimonial">
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-text">"Went from zero to landing my first developer job in 6 months."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar" style="background:linear-gradient(135deg,#4f8ef7,#2dd4bf)">AK</div>
+            <div><div class="author-name">Alex Kumar</div><div class="author-role">Junior Dev @ Stripe</div></div>
+          </div>
+        </div>
+        <div class="testimonial">
+          <div class="stars">★★★★★</div>
+          <p class="testimonial-text">"Got promoted within 3 months of completing the ML course."</p>
+          <div class="testimonial-author">
+            <div class="author-avatar" style="background:linear-gradient(135deg,#fb7185,#f5c842)">SR</div>
+            <div><div class="author-name">Sarah Reyes</div><div class="author-role">ML Engineer @ Meta</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="stats-row">
+        <div><div class="stat-number">12K+</div><div class="stat-label">Active Learners</div></div>
+        <div><div class="stat-number">240+</div><div class="stat-label">Expert Courses</div></div>
+        <div><div class="stat-number">98%</div><div class="stat-label">Satisfaction</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="panel-right">
+    <div class="form-header">
+      <h2 class="form-title" id="formTitle">Welcome back</h2>
+      <p class="form-sub" id="formSub">Don't have an account? <a href="#" onclick="switchTab('register')">Sign up free</a></p>
+    </div>
+    <div class="tab-row">
+      <button class="tab-btn active" id="tabLogin"    onclick="switchTab('login')">Sign In</button>
+      <button class="tab-btn"        id="tabRegister" onclick="switchTab('register')">Create Account</button>
+    </div>
+
+    <div class="error-banner"   id="errorBanner"></div>
+    <div class="success-banner" id="successBanner"></div>
+
+    <!-- LOGIN FORM -->
+    <form class="auth-form" id="loginForm" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <div class="input-wrap">
+          <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <input type="email" class="form-input" id="loginEmail" placeholder="you@example.com" autocomplete="email" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="input-wrap">
+          <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" class="form-input" id="loginPassword" placeholder="Your password" autocomplete="current-password" required>
+          <button type="button" class="pw-toggle" onclick="togglePw('loginPassword')">👁</button>
+        </div>
+      </div>
+      <div class="forgot-row"><a href="#" class="forgot-link">Forgot password?</a></div>
+      <button type="submit" class="btn-submit" id="loginBtn">
+        <span class="btn-text">Sign In</span>
+        <span class="btn-spinner">Signing in…</span>
+      </button>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form class="auth-form" id="registerForm" onsubmit="handleRegister(event)" style="display:none">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <div class="input-wrap">
+          <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <input type="text" class="form-input" id="regName" placeholder="Your full name" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <div class="input-wrap">
+          <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+          <input type="email" class="form-input" id="regEmail" placeholder="you@example.com" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <div class="input-wrap">
+          <svg class="input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" class="form-input" id="regPassword" placeholder="Create a strong password" required>
+          <button type="button" class="pw-toggle" onclick="togglePw('regPassword')">👁</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">I want to</label>
+        <div class="role-select">
+          <button type="button" class="role-btn active" onclick="setRole('STUDENT',this)">📚 Learn</button>
+          <button type="button" class="role-btn"        onclick="setRole('INSTRUCTOR',this)">🎓 Teach</button>
+        </div>
+        <input type="hidden" id="regRole" value="STUDENT">
+      </div>
+      <button type="submit" class="btn-submit" id="registerBtn">
+        <span class="btn-text">Create Account</span>
+        <span class="btn-spinner">Creating…</span>
+      </button>
+      <p class="terms-text">By signing up you agree to our <a href="#">Terms</a> and <a href="#">Privacy Policy</a>.</p>
+    </form>
+  </div>
+</div>
+
+<!-- Ensure this path is correct based on your static settings -->
+<script src="/static/js/api.js"></script>
+
+<script>
+  // 1. Initial check
+  console.log("Login page loaded. API_BASE is:", API_BASE);
+  if (typeof auth !== 'undefined') {
+      redirectIfLoggedIn(); 
+  }
+
+  // 2. The Login Handler
+  async function handleLogin(e) {
+    e.preventDefault();
+    console.log("Login button clicked!");
+
+    const emailField = document.getElementById('loginEmail');
+    const passwordField = document.getElementById('loginPassword');
+    const btn = document.getElementById('loginBtn');
+
+    if (!emailField || !passwordField) {
+        alert("Critical Error: HTML Input IDs (loginEmail/loginPassword) not found!");
+        return;
+    }
+
+    try {
+      btn.innerText = "Signing in...";
+      btn.disabled = true;
+
+      const result = await api.login(emailField.value, passwordField.value);
+
+      if (result.ok) {
+        console.log("Login Success! Role:", result.role);
+        // Direct redirect based on your roles
+        if (result.role === 'ADMIN') window.location.href = '/admin-dashboard/';
+        else if (result.role === 'INSTRUCTOR') window.location.href = '/instructor/';
+        else window.location.href = '/dashboard/';
+      } else {
+        console.error("Login Failed:", result);
+        alert("Login Error: " + (result.error || "Invalid credentials"));
+        btn.innerText = "Sign In";
+        btn.disabled = false;
+      }
+    } catch (err) {
+      console.error("JavaScript Crash:", err);
+      alert("System Error: " + err.message);
+      btn.disabled = false;
+    }
+  }
+
+  // 3. The Register Handler (Simplified)
+  async function handleRegister(e) {
+    e.preventDefault();
+    try {
+      const result = await api.register(
+        document.getElementById('regName').value,
+        document.getElementById('regEmail').value,
+        document.getElementById('regPassword').value,
+        document.getElementById('regRole').value
+      );
+
+      if (result.ok) {
+        alert("Account created! Now please sign in.");
+        location.reload();
+      } else {
+        alert("Registration failed: " + JSON.stringify(result));
+      }
+    } catch (err) {
+      alert("Registration Error: " + err.message);
+    }
+  }
+
+  // Helper for UI Tab switching
+  function switchTab(tab) {
+    const isLogin = tab === 'login';
+    document.getElementById('loginForm').style.display = isLogin ? 'flex' : 'none';
+    document.getElementById('registerForm').style.display = isLogin ? 'none' : 'flex';
+    document.getElementById('tabLogin').classList.toggle('active', isLogin);
+    document.getElementById('tabRegister').classList.toggle('active', !isLogin);
+  }
+
+  function togglePw(id) {
+    const inp = document.getElementById(id);
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+  }
+</script>
+
+</body>
+</html>
