@@ -4,7 +4,7 @@ class accounts(models.Model):
 
     roles = [("STUDENT" , "Student"),
              ("INSTRUCTOR" , "Instructor"),
-             ("ADMIN" , "Admin"),]     #the first is name is used in database and the secodn name is fro frontend
+             ("ADMIN" , "Admin"),]     #the first is name is used in database and the second name is for frontend
 
     email = models.EmailField(unique = True)
     password = models.CharField(max_length = 128)

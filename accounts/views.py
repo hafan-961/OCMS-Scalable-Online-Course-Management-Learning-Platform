@@ -41,9 +41,7 @@ def login(request):
                 "role": user.role,
                 "user": {
                     "full_name": user.full_name,
-                    "email": user.email
-                }
-            })
+                    "email": user.email}})
         else:
             return Response({"error": "Invalid password"}, status=400)
     
